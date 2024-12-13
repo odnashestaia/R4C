@@ -14,8 +14,6 @@ def get_robot_summary():
     # Приведение к naive datetime
     start_date = make_aware(start_date, timezone=utc)
     end_date = make_aware(end_date, timezone=utc)
-    print(start_date, end_date)
-    print([i.created for i in Robot.objects.all()])
     return (
         Robot.objects.filter(created__range=[start_date, end_date])
         .values("model", "version")

@@ -13,7 +13,6 @@ def generate_summary_report(request):
     if request.method != "GET":
         return HttpResponseBadRequest("Only GET requests are allowed.")
     robot_data = get_robot_summary()
-    print(robot_data)
     file_stream = create_excel_file(robot_data)
     return HttpResponse(
         file_stream,
