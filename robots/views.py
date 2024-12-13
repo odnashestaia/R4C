@@ -1,11 +1,12 @@
 import json
 
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from pydantic import ValidationError
 
-from .models import Robot
-from .shemas import RobotSchema
+from .schemas import RobotSchema
+from .services import create_robot_in_db
+from .utils import  create_json_response
 
 
 # #TODO отключить когда будет деплой
@@ -15,26 +16,20 @@ def create_robot(request):
         return HttpResponseBadRequest("Only POST requests are allowed.")
 
     try:
-        # Парсим входящий JSON
         data = json.loads(request.body)
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON format"}, status=400)
+        return create_json_response("Invalid JSON format", status=400)
 
     try:
-        # Валидация данных через Pydantic
         validated_data = RobotSchema(**data).dict()
     except ValidationError as e:
-        return JsonResponse({"error": e.errors()}, status=400)
-    # Сохранение данных в базу
-    try:
-        robot = Robot.objects.create(
-            model=validated_data["model"],
-            version=validated_data["version"],
-            created=validated_data["created"]
-        )
-    except Exception as e:
-        return JsonResponse({"error": f"Database error: {str(e)}"},
-                            status=500)
+        return create_json_response("Validation error",
+                                    {"errors": e.errors()}, status=400)
 
-    return JsonResponse({"message": "Robot created successfully",
-                         "robot_id": robot.id}, status=201)
+    try:
+        robot = create_robot_in_db(validated_data)
+    except Exception as e:
+        return create_json_response(f"Database error: {str(e)}", status=500)
+
+    return create_json_response("Robot created successfully",
+                                {"robot_id": robot.id}, status=201)
