@@ -1,3 +1,17 @@
+# Запуск проекта 
+
+1. Установка зависимостей через poetry 
+``` poetry install ```
+
+2. Запуск виртуального окружения
+
+``` poetry shell  ```
+
+3. Запуск проекта
+
+``` python manage.py runsever ```
+
+
 # R4C - Robots for consumers
 
 ## Небольшая предыстория.
